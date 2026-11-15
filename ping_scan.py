@@ -121,9 +121,8 @@ def ping_host(ip: str, timeout: float) -> bool:
             cmd = ["ping", "-c", "1", "-W", str(max(1, math.ceil(timeout))), ip]
         result = subprocess.run(
             cmd,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            text=True,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
             timeout=timeout + 2,
         )
         return result.returncode == 0

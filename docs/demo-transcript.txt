@@ -1,0 +1,95 @@
+moura-ping-scanner v2.0.0 - transcricao real das execucoes
+Python 3.13 / Windows 11 (pseudo-terminal ConPTY, cores ANSI reais)
+Alvos usados: 127.0.0.1/32 e 192.0.2.0/30 (faixa de laboratorio)
+
+=== python ping_scan.py --version ===
+MOURA-TOOLS Ping Scanner v2.0.0
+
+=== python ping_scan.py --help ===
+usage: ping_scan.py [-h] [--version] --subnet SUBNET [--timeout TIMEOUT]
+                    [--concurrency CONCURRENCY] [--output] [--output-file OUTPUT_FILE]
+                    [--no-color] [--no-emoji] [--quiet] [--json]
+
+MOURA-TOOLS Ping Scanner — ICMP ping sweep with stylish terminal output.
+
+options:
+  -h, --help            show this help message and exit
+  --version             show program's version number and exit
+  --subnet SUBNET       Target subnet in CIDR notation (e.g. 192.168.1.0/24)
+  --timeout TIMEOUT     Per-host timeout in seconds (default: 1.0). On Unix, fractional values are
+                        rounded up to the nearest integer for ping -W.
+  --concurrency CONCURRENCY
+                        Number of parallel ping workers (default: 8)
+  --output              Save online hosts to a file
+  --output-file OUTPUT_FILE
+                        Output file path (default: results.txt)
+  --no-color            Disable ANSI color output
+  --no-emoji            Disable emoji characters (for terminals with limited Unicode support)
+  --quiet               Print only online IPs, one per line — no banner/progress/styling (good for
+                        pipes)
+  --json                Output results as JSON. Mutually exclusive with --quiet.
+
+=== python ping_scan.py --subnet 127.0.0.1/32 ===
+╔══════════════════════════════════════════════╗
+║          MOURA-TOOLS · Ping Scanner          ║
+║       ICMP Sweep · Concurrent · Stylish      ║
+╚══════════════════════════════════════════════╝
+⚙
+  • Subnet:      127.0.0.1/32
+  • Hosts:       1
+  • Timeout:     1.00s
+  • Concurrency: 8
+
+🚀 Starting scan...
+[████████████████████████████]    1/1    (100.0%)  33 h/s
+
+📡 Results
+1 host(s) online:
+  ✅ 127.0.0.1
+
+📊 Summary
+  • Online:   1
+  • Offline:  0
+  • Duration: 31 ms
+
+✨ Scan complete.
+
+=== python ping_scan.py --subnet 192.0.2.0/30 ===
+╔══════════════════════════════════════════════╗
+║          MOURA-TOOLS · Ping Scanner          ║
+║       ICMP Sweep · Concurrent · Stylish      ║
+╚══════════════════════════════════════════════╝
+⚙
+  • Subnet:      192.0.2.0/30
+  • Hosts:       2
+  • Timeout:     1.00s
+  • Concurrency: 8
+
+🚀 Starting scan...
+[████████████████████████████]    2/2    (100.0%)  3 h/s
+
+📡 Results
+No hosts responded to ping.
+
+📊 Summary
+  • Online:   0
+  • Offline:  2
+  • Duration: 723 ms
+
+✨ Scan complete.
+
+=== python ping_scan.py --subnet 127.0.0.1/32 --json ===
+{
+  "subnet": "127.0.0.1/32",
+  "total_hosts": 1,
+  "online": 1,
+  "offline": 0,
+  "duration_seconds": 0.028,
+  "hosts": [
+    "127.0.0.1"
+  ]
+}
+
+=== python ping_scan.py --subnet 127.0.0.1/32 --quiet ===
+127.0.0.1
+

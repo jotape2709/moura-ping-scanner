@@ -1,367 +1,228 @@
-<!--
-MOURA-TOOLS Ping Scanner - README (PT/EN)
-Repo: jotape2709/lab-test
-Main script: ping_scan.py
--->
-
 <div align="center">
 
-# 🔴 MOURA-TOOLS Ping Scanner
+# MOURA-TOOLS Ping Scanner
 
-**ICMP Ping Sweep** em Python para descoberta de hosts em redes locais — rápido, concorrente e com saída estilizada no terminal.  
-**Python ICMP Ping Sweep** for local-network host discovery — fast, concurrent, and with a stylish terminal output.
+**Scanner CLI de varredura ICMP (*ping sweep*) concorrente em arquivo único, feito com Python puro e zero dependências externas.**
 
-<br/>
+*Single-file concurrent ICMP ping sweep CLI built with pure Python and zero external dependencies.*
 
-<!-- Badges -->
-![Python](https://img.shields.io/badge/Python-3.8%2B-3776AB?logo=python&logoColor=white)
-![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20Linux%20%7C%20macOS-555555)
-![CLI](https://img.shields.io/badge/Type-CLI-4c1)
-![Threads](https://img.shields.io/badge/Concurrency-ThreadPoolExecutor-blue)
-![ICMP](https://img.shields.io/badge/Network-ICMP%20Ping-orange)
-![Zero deps](https://img.shields.io/badge/Dependencies-Zero%20external-red)
-![License](https://img.shields.io/badge/License-MIT-lightgrey)
+![Python](https://img.shields.io/badge/Python-3.8%2B-blue?style=flat-square&logo=python&logoColor=white)
+![Dependências](https://img.shields.io/badge/Dependencies-None-brightgreen?style=flat-square)
+![Arquivo único](https://img.shields.io/badge/Single-File-blue?style=flat-square)
+![Versão](https://img.shields.io/badge/Version-2.0.0-red?style=flat-square)
+![Licença](https://img.shields.io/badge/License-MIT-blue?style=flat-square)
+
+[Português](#-português) · [English](#-english)
 
 </div>
 
 ---
 
-## Português
+## 🎬 Demo
 
-### Visão geral
+<div align="center">
 
-O **MOURA-TOOLS Ping Scanner** é um utilitário em Python que realiza **varredura ICMP (ping sweep)** em uma subnet (CIDR) para identificar **hosts online**.  
-Ele usa **execução concorrente** (`ThreadPoolExecutor`), varredura em **streaming** (sem materializar todos os hosts em memória), exibe uma **barra de progresso aprimorada** e pode exportar resultados em arquivo ou JSON.
+![Demo do moura-ping-scanner: versão, varredura ICMP em 127.0.0.1/32 e saída JSON](docs/demo-moura-ping-scanner.gif)
 
-> Ferramenta pensada para **laboratórios** e **inventário/reconhecimento autorizado** de rede.
+</div>
 
-### Recursos
+<details>
+<summary>Ver os frames individuais / View individual frames</summary>
 
-- Branding **MOURA-TOOLS** com tema de cores vermelho
-- Suporte a **CIDR** (ex.: `192.168.1.0/24`)
-- **Multi-thread** com `concurrent.futures.ThreadPoolExecutor`
-- Varredura em **streaming** — janela de futures limitada, sem alocar toda a lista de hosts
-- **Timeout** por host configurável (arredondamento correto no Unix via `math.ceil`)
-- **Concorrência** configurável
-- **Compatibilidade** Windows / Linux / macOS
-- **Saída com cores ANSI** (opção para desativar via `--no-color`)
-- **Emojis opcionais** via `--no-emoji` (para terminais com suporte Unicode limitado)
-- **Barra de progresso** com percentual, velocidade (hosts/s) e ETA estimado
-- Atualização de progresso limitada a **50 ms** para evitar flickering
-- Modo `--quiet`: imprime somente IPs online, ideal para pipes/scripts
-- Modo `--json`: saída estruturada em JSON para automação
-- `--version`: exibe versão da ferramenta
-- **Exportação** de hosts online para arquivo (`--output`)
+| `--version` | `--quiet` |
+|---|---|
+| ![Versão do moura-ping-scanner](docs/demo-01-version.png) | ![Saída quiet com apenas o IP](docs/demo-06-quiet.png) |
 
-### Estrutura do repositório
+**Ajuda completa (`--help`):**
 
-- `ping_scan.py` — script principal (CLI)
-- `README.md` — documentação
+![Ajuda do moura-ping-scanner](docs/demo-02-help.png)
 
-### Requisitos
+**Varredura real em `127.0.0.1/32` (host online detectado, com resumo):**
 
-- **Python 3.8+**
-- Comando **`ping`** disponível no sistema (verificado automaticamente)
+![Varredura em 127.0.0.1/32](docs/demo-03-scan-localhost.png)
 
-### Instalação
+**Faixa de laboratório `192.0.2.0/30` (nenhum host respondeu):**
 
-Este projeto **não possui dependências externas** (somente biblioteca padrão do Python).
+![Varredura em 192.0.2.0/30](docs/demo-04-scan-offline.png)
 
-#### Windows (PowerShell)
+**Saída machine-readable (`--json`):**
 
-```powershell
-python -m venv .venv
-.\.venv\Scripts\Activate.ps1
+![Saída JSON do moura-ping-scanner](docs/demo-05-json.png)
+
+</details>
+
+> 🎥 Gravações reais da execução de `python ping_scan.py`: banner, barra de progresso em streaming, resumo (online/offline/duração) e saída `--json`.
+> Transcrição em texto das execuções: [`docs/demo-transcript.txt`](docs/demo-transcript.txt).
+
+> 🎥 Real recordings of `python ping_scan.py`: banner, streaming progress bar, summary (online/offline/duration) and `--json` output.
+> Plain-text transcript of the runs: [`docs/demo-transcript.txt`](docs/demo-transcript.txt).
+
+---
+
+## 🇧🇷 Português
+
+### Instalação em 3 comandos
+
+Requer **Python 3.8+** e o utilitário `ping` do sistema (sem `pip install`).
+
+```bash
+git clone https://github.com/jotape2709/moura-ping-scanner.git
+cd moura-ping-scanner
 python ping_scan.py -h
 ```
 
-#### Linux/macOS (bash/zsh)
+### Recursos confirmados
+
+- **Zero dependências externas**: arquivo único `ping_scan.py` usando apenas a biblioteca padrão do Python (`argparse`, `concurrent.futures`, `ipaddress`, `json`, `subprocess`, `sys`, `time`).
+- **Varredura ICMP concorrente em streaming**: usa `ThreadPoolExecutor` com janela deslizante de *futures* (`window_size = concurrency * 4`), evitando alocar grandes listas de hosts em memória.
+- **Saída estruturada (`--json`)**: gera JSON limpo no `stdout` com `subnet`, `total_hosts`, `online`, `offline`, `duration_seconds` e `hosts`.
+- **Modo silencioso (`--quiet`)**: imprime apenas os IPs online (um por linha), pronto para pipes e automação.
+- **Exportação em arquivo (`--output` / `--output-file`)**: salva os IPs online em arquivo UTF-8.
+- **Controle visual (`--no-color`, `--no-emoji`)**: desativa cores ANSI e caracteres Unicode para terminais simples.
+- **Validação de entrada**: rejeita subnets inválidas, `--timeout` ou `--concurrency` `<= 0` e uso simultâneo de `--quiet` com `--json` (saída com código `1` e mensagem clara).
+- **Informações da CLI**: suporte a `-h` (ajuda) e `--version` (`MOURA-TOOLS Ping Scanner v2.0.0`).
+
+### Exemplos de uso
+
+**1. Varredura básica e ajuste de timeout/concorrência:**
 
 ```bash
-python3 -m venv .venv
-source .venv/bin/activate
-python3 ping_scan.py -h
+python ping_scan.py --subnet 127.0.0.1/32
+python ping_scan.py --subnet 192.0.2.0/30 --timeout 0.5 --concurrency 20
 ```
 
-### Uso
-
-#### Ajuda
+**2. Saída em JSON (`--json`) e modo silencioso (`--quiet`):**
 
 ```bash
-python ping_scan.py -h
+python ping_scan.py --subnet 127.0.0.1/32 --json
+python ping_scan.py --subnet 127.0.0.1/32 --quiet
 ```
 
-#### Versão
-
-```bash
-python ping_scan.py --version
-```
-
-#### Scan básico
-
-```bash
-python ping_scan.py --subnet 192.168.1.0/24
-```
-
-#### Ajustando timeout e concorrência
-
-```bash
-python ping_scan.py --subnet 10.0.0.0/24 --timeout 0.5 --concurrency 20
-```
-
-#### Modo silencioso (somente IPs online — ideal para pipes)
-
-```bash
-python ping_scan.py --subnet 10.0.0.0/24 --quiet
-# ou redirecionar:
-python ping_scan.py --subnet 10.0.0.0/24 --quiet > hosts_online.txt
-```
-
-#### Saída em JSON
-
-```bash
-python ping_scan.py --subnet 10.0.0.0/24 --json
-```
-
-Exemplo de saída:
+Exemplo de estrutura JSON retornada:
 
 ```json
 {
-  "subnet": "10.0.0.0/24",
-  "total_hosts": 254,
-  "online": 3,
-  "offline": 251,
-  "duration_seconds": 2.541,
+  "subnet": "127.0.0.1/32",
+  "total_hosts": 1,
+  "online": 1,
+  "offline": 0,
+  "duration_seconds": 0.045,
   "hosts": [
-    "10.0.0.1",
-    "10.0.0.5",
-    "10.0.0.10"
+    "127.0.0.1"
   ]
 }
 ```
 
-#### Salvando resultado em arquivo
+**3. Exportação para arquivo e terminal sem ANSI/emojis:**
 
 ```bash
-python ping_scan.py --subnet 10.0.0.0/24 --output
-python ping_scan.py --subnet 10.0.0.0/24 --output --output-file found_hosts.txt
+python ping_scan.py --subnet 127.0.0.1/32 --output --output-file hosts_online.txt
+python ping_scan.py --subnet 127.0.0.1/32 --no-color --no-emoji
 ```
 
-#### Desativando cores e/ou emojis
+### Arquitetura
 
-```bash
-python ping_scan.py --subnet 192.168.1.0/24 --no-color
-python ping_scan.py --subnet 192.168.1.0/24 --no-emoji
-python ping_scan.py --subnet 192.168.1.0/24 --no-color --no-emoji
+```mermaid
+flowchart TD
+    A["main()"] --> B["build_parser() + validate_args()"]
+    B --> C["scan_hosts()"]
+    C --> D["ThreadPoolExecutor (janela = concurrency * 4)"]
+    D --> E["ping_host(ip, timeout)"]
+    C --> F["Saída padrão ANSI / --no-color / --no-emoji"]
+    C --> G["--json (stdout)"]
+    C --> H["--quiet (IPs online)"]
+    C --> I["--output / --output-file (UTF-8)"]
 ```
 
-### Argumentos (CLI)
+### Roadmap
 
-| Flag | Padrão | Descrição |
-|------|--------|-----------|
-| `--subnet` | *(obrigatório)* | Subnet em CIDR (ex.: `192.168.1.0/24`) |
-| `--timeout` | `1.0` | Timeout por host em segundos. No Unix, arredondado para cima. |
-| `--concurrency` | `8` | Número de pings em paralelo |
-| `--output` | desativado | Salva IPs online em arquivo |
-| `--output-file` | `results.txt` | Caminho do arquivo de saída |
-| `--no-color` | desativado | Desativa cores ANSI |
-| `--no-emoji` | desativado | Desativa emojis (para terminais com suporte limitado) |
-| `--quiet` | desativado | Imprime somente IPs online, sem decoração (bom para pipes) |
-| `--json` | desativado | Saída em JSON. Mutuamente exclusivo com `--quiet`. |
-| `--version` | — | Exibe versão e sai |
+- [ ] Validar execução e comportamento de rede nativo em **Linux** e **macOS** (auditoria atual confirmada em Windows 11).
 
-### Observações e limitações
+### Licença
 
-- O script envia **1 ping por host**.
-- Em Unix-like, o parâmetro `-W` do `ping` trabalha com **segundos inteiros**; valores fracionários são arredondados para cima (`math.ceil`). O `subprocess.run` também possui um timeout próprio (`timeout + 2s`).
-- Em Windows, o parâmetro `-w` do `ping` recebe **milissegundos**.
-- Firewalls e políticas de rede podem **bloquear ICMP**, fazendo hosts parecerem offline.
-- `--quiet` e `--json` são **mutuamente exclusivos** (uso simultâneo retorna erro amigável).
-
-### Aviso legal (Disclaimer)
-
-Esta ferramenta é destinada a uso educacional e **reconhecimento autorizado**. Varredura não autorizada de redes/sistemas pode ser ilegal e antiética. Use apenas onde você tenha permissão explícita.
+Distribuído sob a licença **MIT**. Consulte o arquivo [LICENSE](LICENSE).
 
 ---
 
-## English
+## 🇺🇸 English
 
-### Overview
+### 3-Command Setup
 
-**MOURA-TOOLS Ping Scanner** is a Python utility that performs an **ICMP ping sweep** over a CIDR subnet to identify **reachable (online) hosts**.  
-It uses **concurrency** (`ThreadPoolExecutor`), **streaming** host scanning (bounded futures window — no full host list in memory), an **enhanced progress bar**, and can output results as JSON or write them to a file.
+Requires **Python 3.8+** and the system `ping` utility (no `pip install` needed).
 
-> Designed for **lab environments** and **authorized** network inventory/reconnaissance.
-
-### Features
-
-- **MOURA-TOOLS** branding with red color theme
-- **CIDR** support (e.g. `192.168.1.0/24`)
-- **Multi-threaded** scanning via `concurrent.futures.ThreadPoolExecutor`
-- **Streaming scan** — bounded futures window, no full host-list allocation
-- Configurable per-host **timeout** (correctly rounded up on Unix via `math.ceil`)
-- Configurable **concurrency**
-- **Windows / Linux / macOS** support
-- **ANSI colored output** (disable with `--no-color`)
-- Optional **emoji** support (disable with `--no-emoji` for limited terminals)
-- Enhanced **progress bar** with percentage, speed (hosts/s), and estimated ETA
-- Progress updates **throttled to 50 ms** to prevent flickering
-- `--quiet` mode: prints only online IPs — perfect for pipes/scripts
-- `--json` mode: structured JSON output for automation
-- `--version`: prints tool version
-- Optional **file export** of online hosts (`--output`)
-
-### Repository layout
-
-- `ping_scan.py` — main CLI script
-- `README.md` — documentation
-
-### Requirements
-
-- **Python 3.8+**
-- System **`ping`** command available (automatically checked at startup)
-
-### Installation
-
-No external dependencies (standard library only).
-
-#### Windows (PowerShell)
-
-```powershell
-python -m venv .venv
-.\.venv\Scripts\Activate.ps1
+```bash
+git clone https://github.com/jotape2709/moura-ping-scanner.git
+cd moura-ping-scanner
 python ping_scan.py -h
 ```
 
-#### Linux/macOS (bash/zsh)
+### Confirmed Features
+
+- **Zero external dependencies**: single file `ping_scan.py` built strictly with the Python standard library (`argparse`, `concurrent.futures`, `ipaddress`, `json`, `subprocess`, `sys`, `time`).
+- **Streaming concurrent ICMP sweep**: uses `ThreadPoolExecutor` with a bounded sliding futures window (`window_size = concurrency * 4`) to avoid excessive memory usage on large subnets.
+- **Structured JSON output (`--json`)**: writes clean JSON to `stdout` containing `subnet`, `total_hosts`, `online`, `offline`, `duration_seconds`, and `hosts`.
+- **Quiet mode (`--quiet`)**: prints only reachable IP addresses (one per line) for pipes and scripts.
+- **File export (`--output` / `--output-file`)**: writes online IPs to a UTF-8 text file.
+- **Display controls (`--no-color`, `--no-emoji`)**: disables ANSI colors and Unicode icons for plain terminals.
+- **Input validation**: rejects invalid CIDR subnets, `--timeout` or `--concurrency` `<= 0`, and mutually exclusive `--quiet` + `--json` flags, exiting with code `1` and a clear message.
+- **CLI metadata**: supports `-h` (help) and `--version` (`MOURA-TOOLS Ping Scanner v2.0.0`).
+
+### Usage Examples
+
+**1. Basic sweep and custom timeout/concurrency:**
 
 ```bash
-python3 -m venv .venv
-source .venv/bin/activate
-python3 ping_scan.py -h
+python ping_scan.py --subnet 127.0.0.1/32
+python ping_scan.py --subnet 192.0.2.0/30 --timeout 0.5 --concurrency 20
 ```
 
-### Usage
-
-#### Help
+**2. JSON output (`--json`) and quiet mode (`--quiet`):**
 
 ```bash
-python ping_scan.py -h
+python ping_scan.py --subnet 127.0.0.1/32 --json
+python ping_scan.py --subnet 127.0.0.1/32 --quiet
 ```
 
-#### Version
-
-```bash
-python ping_scan.py --version
-```
-
-#### Basic scan
-
-```bash
-python ping_scan.py --subnet 192.168.1.0/24
-```
-
-#### Custom timeout and concurrency
-
-```bash
-python ping_scan.py --subnet 10.0.0.0/24 --timeout 0.5 --concurrency 20
-```
-
-#### Quiet mode (online IPs only — good for pipes)
-
-```bash
-python ping_scan.py --subnet 10.0.0.0/24 --quiet
-# redirect to file:
-python ping_scan.py --subnet 10.0.0.0/24 --quiet > online_hosts.txt
-```
-
-#### JSON output
-
-```bash
-python ping_scan.py --subnet 10.0.0.0/24 --json
-```
-
-Example output:
+Example JSON output structure:
 
 ```json
 {
-  "subnet": "10.0.0.0/24",
-  "total_hosts": 254,
-  "online": 3,
-  "offline": 251,
-  "duration_seconds": 2.541,
+  "subnet": "127.0.0.1/32",
+  "total_hosts": 1,
+  "online": 1,
+  "offline": 0,
+  "duration_seconds": 0.045,
   "hosts": [
-    "10.0.0.1",
-    "10.0.0.5",
-    "10.0.0.10"
+    "127.0.0.1"
   ]
 }
 ```
 
-#### Save results to a file
+**3. Save to file and disable ANSI/emojis:**
 
 ```bash
-python ping_scan.py --subnet 10.0.0.0/24 --output
-python ping_scan.py --subnet 10.0.0.0/24 --output --output-file found_hosts.txt
+python ping_scan.py --subnet 127.0.0.1/32 --output --output-file online_hosts.txt
+python ping_scan.py --subnet 127.0.0.1/32 --no-color --no-emoji
 ```
 
-#### Disable colors and/or emojis
+### Architecture
 
-```bash
-python ping_scan.py --subnet 192.168.1.0/24 --no-color
-python ping_scan.py --subnet 192.168.1.0/24 --no-emoji
-python ping_scan.py --subnet 192.168.1.0/24 --no-color --no-emoji
+```mermaid
+flowchart TD
+    A["main()"] --> B["build_parser() + validate_args()"]
+    B --> C["scan_hosts()"]
+    C --> D["ThreadPoolExecutor (window = concurrency * 4)"]
+    D --> E["ping_host(ip, timeout)"]
+    C --> F["ANSI terminal output / --no-color / --no-emoji"]
+    C --> G["--json (stdout)"]
+    C --> H["--quiet (online IPs)"]
+    C --> I["--output / --output-file (UTF-8)"]
 ```
 
-### CLI arguments
+### Roadmap
 
-| Flag | Default | Description |
-|------|---------|-------------|
-| `--subnet` | *(required)* | Target subnet in CIDR (e.g. `192.168.1.0/24`) |
-| `--timeout` | `1.0` | Per-host timeout in seconds. Rounded up on Unix. |
-| `--concurrency` | `8` | Number of parallel ping workers |
-| `--output` | disabled | Save online hosts to a file |
-| `--output-file` | `results.txt` | Output file path |
-| `--no-color` | disabled | Disable ANSI colors |
-| `--no-emoji` | disabled | Disable emojis (for terminals with limited Unicode support) |
-| `--quiet` | disabled | Print only online IPs, no decoration (good for pipes) |
-| `--json` | disabled | JSON output. Mutually exclusive with `--quiet`. |
-| `--version` | — | Print version and exit |
+- [ ] Validate execution and native networking behavior on **Linux** and **macOS** (current audit confirmed on Windows 11).
 
-### Notes & limitations
+### License
 
-- Sends **1 ping per host**.
-- On Unix-like systems, `ping -W` takes **integer seconds**; fractional timeout values are rounded up with `math.ceil`. `subprocess.run` also has its own safety timeout (`timeout + 2s`).
-- On Windows, `ping -w` takes **milliseconds**.
-- Firewalls may **block ICMP**, causing hosts to appear offline.
-- `--quiet` and `--json` are **mutually exclusive** (using both prints a friendly error).
-
-### Disclaimer
-
-This tool is for educational and **authorized** network reconnaissance only. Unauthorized scanning may be illegal and unethical. Use only on networks you have explicit permission to test.
-
----
-
-## License
-
-The MIT License (MIT)
-
-Copyright (c) 2011-2025 The Bootstrap Authors
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-THE SOFTWARE.
+Distributed under the **MIT** License. See [LICENSE](LICENSE) for details.
